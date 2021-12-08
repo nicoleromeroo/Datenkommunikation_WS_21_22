@@ -16,7 +16,7 @@ public class ConnectionWorkerThreadImpl extends Thread{
     private final ServerSocketInterface socket;
     private boolean isFinished = false;
     private Connection connection;
-    //private MessagingLoggingWorkerThread messagingLoggingWorker;
+    private AuditLogMessageLoggingWorkerThread messagingLoggingWorker;
 
     public ConnectionWorkerThreadImpl(AuditLogPDUMessagesInterface<AuditLogPDU> model, ServerSocketInterface socket) {
         this.model = model;
@@ -32,7 +32,7 @@ public class ConnectionWorkerThreadImpl extends Thread{
                 connection = socket.accept();
                 log.debug("Neuer Verbindungsaufbauwunsch empfangen");
                 while (!isFinished && !Thread.currentThread().isInterrupted()) {
-                    //startMessageLoggingWorkerImpl();
+                    startMessageLoggingWorkerImpl();
                     handleIncomingMessage();
                 }
             } catch (Exception e) {
@@ -47,12 +47,16 @@ public class ConnectionWorkerThreadImpl extends Thread{
         stopConnection();
     }
 
-    /*
+    /**
+     * Wenn Audit-Message-Logging Worker Thread ist nicht da, dann starten.
+     */
     private void startMessageLoggingWorkerImpl() {
-        if (mes) {
-
+        if (messagingLoggingWorker.isInterrupted() || !messagingLoggingWorker.isAlive()) {
+            messagingLoggingWorker = new AuditLogMessageLoggingWorkerThread(model);
+            messagingLoggingWorker.setName("Audit-Message-Logging Worker Thread");
+            messagingLoggingWorker.start();
         }
-    }*/
+    }
 
     //SimpleChatWorkerThreadImpl
     private void handleIncomingMessage() {

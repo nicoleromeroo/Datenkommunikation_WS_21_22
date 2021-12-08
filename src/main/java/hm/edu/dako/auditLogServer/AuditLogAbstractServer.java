@@ -1,39 +1,38 @@
 package hm.edu.dako.auditLogServer;
 
+import hm.edu.dako.chatCommon.ExceptionHandler;
 import hm.edu.dako.connection.ServerSocketInterface;
 import hm.edu.dako.pdu.AuditLogPDU;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.LoggerContext;
 
-import java.io.File;
-
-import static javafx.application.Application.launch;
+import java.io.IOException;
+import java.util.Objects;
 
 /**
  *  ChatServerGUI
  */
 
 
-public class AuditLogAbstractServer implements AuditLogServerInterface{
+public abstract class AuditLogAbstractServer implements AuditLogServerInterface{
 
     /**
      * Default AuditLog Server Port.
      */
     // Standardvalue for AuditLogServer
-    static final String DEFAULT_AUDITLOGSERVER_PORT = "40001";
+    static final int DEFAULT_AUDITLOGSERVER_PORT = 40001;
 
     /**
      * Default Send Buffer Size fuer Server Port in Bytes.
      */
     // Standard-und Maximal-Puffergroessen in Byte
-    static final String DEFAULT_SENDBUFFER_SIZE = "300000";
+    static final int DEFAULT_SENDBUFFER_SIZE = 300000;
     /**
      * Default Receive Buffer Size fuer Server Port in Bytes.
      */
-    static final String DEFAULT_RECEIVEBUFFER_SIZE = "300000";
+    static final int DEFAULT_RECEIVEBUFFER_SIZE = 300000;
 
-    private static final Logger log = LogManager.getLogger(AuditLogAbstractServer.class);
+    static final Logger log = LogManager.getLogger(AuditLogAbstractServer.class);
 
     static ServerSocketInterface serverSocket;
 
@@ -42,37 +41,49 @@ public class AuditLogAbstractServer implements AuditLogServerInterface{
     private ConnectionWorkerThreadImpl connectionWorkerThread;
     private AuditLogPDUMessagesInterface<AuditLogPDU> model;
 
-    public AuditLogAbstractServer(int serverPort) {
+    AuditLogAbstractServer() {
+        this(AuditLogAbstractServer.DEFAULT_AUDITLOGSERVER_PORT);
+    }
+    AuditLogAbstractServer(int serverPort) {
         this.serverPort = serverPort;
+        initLog4J();
     }
 
-    public AuditLogAbstractServer(int serverPort, AuditLogPDUMessagesInterface<AuditLogPDU> model) {
+    AuditLogAbstractServer(int serverPort, AuditLogPDUMessagesInterface<AuditLogPDU> model) {
         this.serverPort = serverPort;
         this.model = model;
     }
 
-    public AuditLogPDUMessagesInterface<AuditLogPDU> getModel() {
-        return model;
+    /**
+     * Initializiert die Konfiguration fuer log.
+     */
+    abstract void initLog4J();
+
+    private synchronized AuditLogPDUMessagesInterface<AuditLogPDU> getModel() {
+        //if model == null -> new AuditLogPDUMessageImpl
+        return Objects.requireNonNullElseGet(model, () -> model = new AuditLogPDUMessagesImpl());
     }
-
-    public static void main(String[] args) {
-
-        // Log4j2-Logging aus Datei konfigurieren
-        LoggerContext context = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
-        File file = new File("log4j2.chatServer.xml");
-        context.setConfigLocation(file.toURI());
-
-        launch(args);
-    }
-
 
     @Override
     public void start() {
+        try {
+            if (connectionWorkerThread == null) {
+                connectionWorkerThread = new ConnectionWorkerThreadImpl(getModel(), getServerSocket());
+                connectionWorkerThread.setName("Connection-Worker-Thread");
+            }
+            connectionWorkerThread.start();
+        } catch (IOException e) {
+            log.error("Der Socket kann nicht initialisiert werden.");
+            ExceptionHandler.logException(e);
+        }
 
     }
 
-    @Override
-    public void stop() throws Exception {
-
-    }
+    /**
+     * Erstellt neuer Instanz ServerSocketInterface, nur wenn serverSocket = null.
+     *
+     * @return Instanz von {@link ServerSocketInterface}
+     * @throws IOException wenn Instanz nicht erstellt werden kann.
+     */
+    abstract ServerSocketInterface getServerSocket() throws IOException;
 }

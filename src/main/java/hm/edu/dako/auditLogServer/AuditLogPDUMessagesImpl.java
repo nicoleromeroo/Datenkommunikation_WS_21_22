@@ -14,6 +14,8 @@ public class AuditLogPDUMessagesImpl implements AuditLogPDUMessagesInterface<Aud
     private final List<AuditLogPDU> messages;
     private volatile int counterNewMessages = 0;
 
+    public AuditLogPDUMessagesImpl() {this(new ArrayList<>());}
+
     public AuditLogPDUMessagesImpl(List<AuditLogPDU> messages) {
         this.messages = messages;
     }
