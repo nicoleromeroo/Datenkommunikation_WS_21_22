@@ -3,8 +3,10 @@ package hm.edu.dako.auditLogServer;
 import hm.edu.dako.connection.ServerSocketInterface;
 import hm.edu.dako.connection.tcp.TcpServerSocket;
 import hm.edu.dako.pdu.AuditLogPDU;
-import org.apache.log4j.PropertyConfigurator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
 
+import java.io.File;
 import java.io.IOException;
 
 public class TCPServer extends AuditLogAbstractServer {
@@ -35,7 +37,9 @@ public class TCPServer extends AuditLogAbstractServer {
 
     @Override
     void initLog4J() {
-        PropertyConfigurator.configureAndWatch("log4j.auditLogServer_tcp.properties");
+        LoggerContext context = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
+        File file = new File("log4j2.auditLogTcpServer.xml");
+        context.setConfigLocation(file.toURI());
     }
 
     @Override
@@ -48,11 +52,7 @@ public class TCPServer extends AuditLogAbstractServer {
             );
         }
         log.info("Server wurde auf " + serverPort + " Port initialisert");
-        return null;
-    }
-    //brauchen das nicht
-    @Override
-    public void stop() throws Exception {
+        return serverSocket;
 
     }
 }
