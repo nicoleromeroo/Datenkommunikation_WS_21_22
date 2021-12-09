@@ -3,8 +3,10 @@ package hm.edu.dako.auditLogServer;
 import hm.edu.dako.connection.ServerSocketInterface;
 import hm.edu.dako.connection.tcp.TcpServerSocket;
 import hm.edu.dako.pdu.AuditLogPDU;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -53,6 +55,7 @@ public class TCPServer extends AuditLogAbstractServer {
         }
         log.info("Server wurde auf " + serverPort + " Port initialisert");
         return serverSocket;
+
 
     }
 }

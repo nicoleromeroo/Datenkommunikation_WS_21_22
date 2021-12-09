@@ -1,7 +1,9 @@
 package hm.edu.dako.auditLogServer;
 
 import hm.edu.dako.connection.ServerSocketInterface;
+
 import hm.edu.dako.connection.udp.UdpServerSocket;
+
 import hm.edu.dako.pdu.AuditLogPDU;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -46,6 +48,7 @@ public class UDPServer extends AuditLogAbstractServer{
     ServerSocketInterface getServerSocket() throws IOException {
         if (serverSocket == null) {
             serverSocket = new UdpServerSocket(
+
                     serverPort,
                     AuditLogAbstractServer.DEFAULT_RECEIVEBUFFER_SIZE,
                     AuditLogAbstractServer.DEFAULT_SENDBUFFER_SIZE
@@ -54,4 +57,5 @@ public class UDPServer extends AuditLogAbstractServer{
         log.info("Server wurde auf " + serverPort + " Port initialisert");
         return serverSocket;
     }
+ 
 }
