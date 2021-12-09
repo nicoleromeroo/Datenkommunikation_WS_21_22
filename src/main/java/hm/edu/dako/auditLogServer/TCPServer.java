@@ -4,6 +4,7 @@ import hm.edu.dako.connection.ServerSocketInterface;
 import hm.edu.dako.connection.tcp.TcpServerSocket;
 import hm.edu.dako.pdu.AuditLogPDU;
 import org.apache.log4j.PropertyConfigurator;
+import org.scf4j.props.PropertyConfigurator;
 
 import java.io.IOException;
 
@@ -48,7 +49,7 @@ public class TCPServer extends AuditLogAbstractServer {
             );
         }
         log.info("Server wurde auf " + serverPort + " Port initialisert");
-        return null;
+        return serverSocket;
     }
     //brauchen das nicht
     @Override

@@ -1,6 +1,7 @@
 package hm.edu.dako.auditLogServer;
 
 import hm.edu.dako.connection.ServerSocketInterface;
+import hm.edu.dako.connection.tcp.TcpServerSocket;
 import hm.edu.dako.pdu.AuditLogPDU;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -39,7 +40,15 @@ public class UDPServer extends AuditLogAbstractServer{
 
     @Override
     ServerSocketInterface getServerSocket() throws IOException {
-        return null;
+        if (serverSocket == null) {
+            serverSocket = new TcpServerSocket(
+                    serverPort,
+                    AuditLogAbstractServer.DEFAULT_RECEIVEBUFFER_SIZE,
+                    AuditLogAbstractServer.DEFAULT_SENDBUFFER_SIZE
+            );
+        }
+        log.info("Server wurde auf " + serverPort + " Port initialisert");
+        return serverSocket;
     }
     // nicht zu gebrauchen
     @Override
