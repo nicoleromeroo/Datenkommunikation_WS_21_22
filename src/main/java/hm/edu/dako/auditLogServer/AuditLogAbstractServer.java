@@ -7,7 +7,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.util.Objects;
 
 /**
  *  ChatServerGUI
@@ -20,7 +19,7 @@ public abstract class AuditLogAbstractServer implements AuditLogServerInterface{
      * Default AuditLog Server Port.
      */
     // Standardvalue for AuditLogServer
-    static final int DEFAULT_AUDITLOGSERVER_PORT = 40001;
+    static final int DEFAULT_AUDIT_LOG_SERVER_PORT = 40001;
 
     /**
      * Default Send Buffer Size fuer Server Port in Bytes.
@@ -42,11 +41,11 @@ public abstract class AuditLogAbstractServer implements AuditLogServerInterface{
     private AuditLogPDUMessagesInterface<AuditLogPDU> model;
 
     AuditLogAbstractServer() {
-        this(AuditLogAbstractServer.DEFAULT_AUDITLOGSERVER_PORT);
+        this(AuditLogAbstractServer.DEFAULT_AUDIT_LOG_SERVER_PORT);
     }
     AuditLogAbstractServer(int serverPort) {
         this.serverPort = serverPort;
-        initLog4J();
+        checkAndConfigure();
     }
 
     AuditLogAbstractServer(int serverPort, AuditLogPDUMessagesInterface<AuditLogPDU> model) {
@@ -57,11 +56,14 @@ public abstract class AuditLogAbstractServer implements AuditLogServerInterface{
     /**
      * Initializiert die Konfiguration fuer log.
      */
-    abstract void initLog4J();
+    abstract void checkAndConfigure();
 
     private synchronized AuditLogPDUMessagesInterface<AuditLogPDU> getModel() {
         //if model == null -> new AuditLogPDUMessageImpl
-        return Objects.requireNonNullElseGet(model, () -> model = new AuditLogPDUMessagesImpl());
+        if (model != null) {
+            return model;
+        }
+        return model = new AuditLogPDUMessagesImpl();
     }
 
     @Override

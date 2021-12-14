@@ -3,16 +3,15 @@ package hm.edu.dako.auditLogServer;
 import hm.edu.dako.connection.ServerSocketInterface;
 import hm.edu.dako.connection.tcp.TcpServerSocket;
 import hm.edu.dako.pdu.AuditLogPDU;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 
-
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+
 
 public class TCPServer extends AuditLogAbstractServer {
-
     public TCPServer() {
         super();
     }
@@ -34,14 +33,21 @@ public class TCPServer extends AuditLogAbstractServer {
         else {
             theServer = new TCPServer();
         }
+
         theServer.start();
     }
 
     @Override
-    void initLog4J() {
+    void checkAndConfigure() {
+        // Log4j2-Logging aus Datei konfigurieren; von ClientFxGUI
         LoggerContext context = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
         File file = new File("log4j2.auditLogTcpServer.xml");
         context.setConfigLocation(file.toURI());
+        //ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        //URL url = loader.getResource("log4j2.auditLogTcpServer.xml");
+        //PropertyConfigurator.configure("log4j2.auditLogUdpServer.xml");
+
+        //FileWatchdog.checkAndConfigure(url);
     }
 
     @Override
