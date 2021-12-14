@@ -11,7 +11,7 @@ checkstyle {
 jar.enabled = false
 
 javafx {
-    version = "15"
+    version = "17"
     modules = ['javafx.controls', 'javafx.fxml']
 }
 
@@ -34,11 +34,10 @@ repositories {
 
 dependencies {
 
-    implementation(group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3')
-    implementation(group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3')
-    implementation(group: 'org.openjfx', name: 'javafx', version: '16-ea+1')
+    implementation(group: 'org.openjfx', name: 'javafx', version: '17.0.0.1')
     implementation(group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1')
-    implementation 'org.scf4j:scf4j-props:1.0.1'
+    implementation 'org.apache.logging.log4j:log4j-core:2.15.0'
+    implementation 'org.apache.logging.log4j:log4j-api:2.15.0'
 
 }
 

@@ -9,14 +9,16 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
 //AuditLogWriter
 public class AuditLogMessageLoggingWorkerThread extends Thread {
-    private static Logger log = LogManager.getLogger(AuditLogMessageLoggingWorkerThread.class);
+    private static final Logger log = LogManager.getLogger(AuditLogMessageLoggingWorkerThread.class);
     private final AuditLogPDUMessagesInterface<AuditLogPDU> model;
     private int counterForMessage = 0;
     private BufferedWriter writer;
@@ -26,6 +28,9 @@ public class AuditLogMessageLoggingWorkerThread extends Thread {
         setDaemon(true);
     }
 
+    /**
+     * Soll warten bis alle Nachrichten eingesammelt wurden und dann wird ein cvs log file erstellt.
+     */
     @SuppressWarnings("BusyWait")
     public void run() {
         while (Thread.currentThread().isInterrupted()) {
@@ -33,7 +38,7 @@ public class AuditLogMessageLoggingWorkerThread extends Thread {
                 List<AuditLogPDU> newMessages = model.getNewMessages();
                 counterForMessage += newMessages.size();
                 log.debug("Menge der neuen Nachrichten: " + counterForMessage);
-                for (AuditLogPDU auditLogPDU : model.getNewMessages()) {
+                for (AuditLogPDU auditLogPDU : newMessages) {
                     log.debug(auditLogPDU);
                     getWriter()
                             .append(auditLogPDU.getPduType().toString())
@@ -54,8 +59,8 @@ public class AuditLogMessageLoggingWorkerThread extends Thread {
                 getWriter().flush();
                 Thread.sleep(1200);
             } catch (InterruptedException | IOException e) {
-                Thread.currentThread().interrupt();
                 ExceptionHandler.logException(e);
+                Thread.currentThread().interrupt();
             }
         }
     }
@@ -66,18 +71,24 @@ public class AuditLogMessageLoggingWorkerThread extends Thread {
         if (writer == null) {
             final File logDir = new File(System.getProperty("user.dir") + File.separator + "logs");
             if (!logDir.exists()) {
-                logDir.mkdirs();
+                logDir.createNewFile();
             }
             //https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
-            LocalDate date = LocalDate.now();
+            //LocalDate date = LocalDate.now();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            String dateFormatted = date.format(formatter);
+            //String dateFormatted = date.format(formatter);
             //SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             //String formattedDate = format.format(LocalDate.now());
 
-            File logFile = new File(logDir.getAbsolutePath() + File.separator + "audit_log_" + dateFormatted + ".csv");
+            //File logFile = new File(logDir.getAbsolutePath() + File.separator + "audit_log_" + dateFormatted + ".csv");
+
+            //writer = new BufferedWriter(new FileWriter(logFile, true));
+            String logFileDate = formatter.format(Instant.now());
+
+            File logFile = new File(logDir.getAbsolutePath() + File.separator + "audit_log_" + logFileDate + ".csv");
 
             writer = new BufferedWriter(new FileWriter(logFile, true));
+
 
             createLogHeaderLine();
         }
@@ -99,6 +110,36 @@ public class AuditLogMessageLoggingWorkerThread extends Thread {
                 .append("Message")
                 .append("||");
         writer.newLine();
+
+        /*String PDUType = "PDU Type\n";
+        String STN = "PDU Type\n";
+        String CTN = "PDU Type\n";
+        String AT = "PDU Type\n";
+        String UN = "PDU Type\n";
+        String MS = "PDU Type\n";
+
+        writer.write(PDUType);
+        writer.write(STN);
+        writer.write(CTN);
+        writer.write(AT);
+        writer.write(UN);
+        writer.write(MS);
+        writer.newLine();*/
+
+        /*try (FileWriter writer = new FileWriter("app.log", true);
+             BufferedWriter bw = new BufferedWriter(writer)) {
+
+            bw.write(PDUType);
+            bw.write(STN);
+            bw.write(CTN);
+            bw.write(AT);
+            bw.write(UN);
+            bw.write(MS);
+
+        } catch (IOException e) {
+            System.err.format("IOException: %s%n", e);
+        }*/
+
     }
 
 
